@@ -12,11 +12,10 @@ $o_user = trim($_POST['o_user']);
 $o_pass = trim($_POST['o_pass']);
 $o_prefix = trim($_POST['o_prefix']);
 $update = trim($_POST['update']);
+$wsdl = trim($_POST['wsdl']);
 $Tableschosen = $_POST['Tableschosen'];
 
 $m_objects = get_objects($o_prefix);
-
-$wsdl = __DIR__ . '/includes/soapclient/partner.wsdl.xml';
 
 $start_time = microtime(true);
 
