@@ -1,3 +1,6 @@
 [submodule "includes/Force.com-Toolkit-for-PHP"]
 	path = includes/Force.com-Toolkit-for-PHP
 	url = https://github.com/developerforce/Force.com-Toolkit-for-PHP.git
+[submodule "includes/adodb"]
+	path = includes/adodb
+	url = https://github.com/ADOdb/ADOdb.git
