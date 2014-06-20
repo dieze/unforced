@@ -1,5 +1,30 @@
 <?php
 
+    $dir = __DIR__ . '/includes/soapclient';
+
+    try {
+      $files = scandir($dir);
+    }
+    catch (Exception $ex) {
+      echo $ex->message;
+    }
+
+    if (!$files) {
+      echo "Impossible d'ouvrir le dossier \"$dir\"\n";
+      exit;
+    }
+
+    $wsdls = array();
+
+    // partner.wsdl- = 13
+    // .xml = 4
+    foreach ($files as $file) {
+      if (substr($file, 0, 13) == 'partner.wsdl-' && substr($file, -4) == '.xml') {
+        $filename = $dir . '/' . $file;
+        $orgname = substr($file, 13, strlen($file)-13-4);
+        array_push($wsdls, array($filename, $orgname));
+      }
+    }
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -15,6 +40,14 @@
   <center><img src="http://upload.wikimedia.org/wikipedia/en/0/0a/Salesforce_logo.png" alt="" border="0"></center>
   <form action="create_code.php" method="post">
       <table width="100%" align="center">
+         <tr>
+          <td align="right">*&#160;Salesforce WSDL:&#160;</td>
+          <td align="left">
+            <select name="wsdl">
+              <?php foreach ($wsdls as $wsdl) { echo '<option value="'.$wsdl[0].'">' . $wsdl[1] . '</option>'; } ?>
+            </select>
+          </td>
+         </tr>
          <tr>
           <td align="right">*&#160;Salesforce Username:&#160;</td>
           <td align="left"><input name="user" type="text" maxlength="50" align="right" value=""></td>

@@ -16,7 +16,7 @@ echo($start_time);
     $o_pass = trim($_POST['o_pass']);
     $o_prefix = trim($_POST['o_prefix']);
     $o_skip = (trim($_POST['o_skip']) == TRUE) ? TRUE : FALSE;
-	$wsdl = './includes/soapclient/partner.wsdl.xml';
+	$wsdl = trim($_POST['wsdl']);
 	
 	buildTables($o_prefix, $o_user, $o_pass, $o_db, $wsdl, $user, $pass, $o_skip);
 $end_time = microtime(true);
