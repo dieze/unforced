@@ -175,7 +175,7 @@ function get_objects($o_prefix="sforce_",$TableFile = "./data/salesforce_mysql.s
 				//echo "<h1><u>" . $buffer . "</u></h1>";
 				$fields = 0;
 				
-				while (preg_match('/\)\;/', $buffer) == 0 && preg_match('/\)TYPE=\InnoDB\;/', $buffer) == 0)
+				while (preg_match('/\)\;/', $buffer) == 0 && preg_match('/\)ENGINE=\InnoDB\;/', $buffer) == 0)
 				{
 					//echo($buffer . "<br>");
 					$buffer = fgets($handle);
