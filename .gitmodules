@@ -1,0 +1,3 @@
+[submodule "includes/Force.com-Toolkit-for-PHP"]
+	path = includes/Force.com-Toolkit-for-PHP
+	url = https://github.com/developerforce/Force.com-Toolkit-for-PHP.git
