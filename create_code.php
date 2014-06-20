@@ -1,7 +1,7 @@
 <?php
 
 ini_set("soap.wsdl_cache_enabled", "0");
-require_once ('functions/salesforce_mysql_build.php');
+require_once (__DIR__ . '/functions/salesforce_mysql_build.php');
 
 //TODO: use this file to launch a database build
 if (isset($_POST['submit']))

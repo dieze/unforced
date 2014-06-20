@@ -29,9 +29,9 @@
 
 ini_set("soap.wsdl_cache_enabled", "0");
 
-require_once ('/../includes/soapclient/SforcePartnerClient.php');
-require_once ('/../includes/adodb/adodb.inc.php');
-require_once ('sf_mysql_global.php');
+require_once (__DIR__ . '/../includes/soapclient/SforcePartnerClient.php');
+require_once (__DIR__ . '/../includes/adodb/adodb.inc.php');
+require_once (__DIR__ . '/sf_mysql_global.php');
 
 //function that glues the other functions together, move this!
 function backup_into_mysql($tables, $o_prefix, $o_host, $o_user, $o_pass, $o_db, $wsdl, $user, $pass, $update=false)

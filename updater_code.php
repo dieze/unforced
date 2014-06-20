@@ -2,7 +2,7 @@
 
 ini_set("soap.wsdl_cache_enabled", "0");
 
-require_once ('functions/sf_mysql_functions.php');
+require_once (__DIR__ . '/functions/sf_mysql_functions.php');
 
 $user = trim($_POST['user']);
 $pass = trim($_POST['pass']);
@@ -16,7 +16,7 @@ $Tableschosen = $_POST['Tableschosen'];
 
 $m_objects = get_objects($o_prefix);
 
-$wsdl = './includes/soapclient/partner.wsdl.xml';
+$wsdl = __DIR__ . '/includes/soapclient/partner.wsdl.xml';
 
 $start_time = microtime(true);
 

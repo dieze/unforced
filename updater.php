@@ -1,5 +1,5 @@
 <?php
-require_once ('./functions/sf_mysql_functions.php'); 
+require_once (__DIR__ . '/functions/sf_mysql_functions.php'); 
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
