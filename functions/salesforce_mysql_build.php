@@ -23,8 +23,8 @@
  
 set_time_limit(600);
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
-//require_once (__DIR__ . '/../includes/soapclient/SforcePartnerClient.php');
-//require_once (__DIR__ . '/../includes/soapclient/SforceHeaderOptions.php');
+//require_once ('/../includes/soapclient/SforcePartnerClient.php');
+//require_once ('/../includes/soapclient/SforceHeaderOptions.php');
 ini_set("soap.wsdl_cache_enabled", "0");
 
 require_once (__DIR__ . '/../includes/soapclient/SforcePartnerClient.php');
@@ -64,15 +64,15 @@ function buildTables($o_prefix, $o_user, $o_pass, $o_db, $wsdl, $user, $pass, $o
 				$buildRelationships[] = NULL;
 				
 				// Cycle through each object
-				foreach ($result->types as $objectType)
+				foreach ($result->sobjects as $sobject)
 				{
 					// Start the table creation statement
-					$createTable = StartTable($o_prefix, $objectType);
-					//echo ("wrote SQL for " & $objectType & "<br/>");
+					$createTable = StartTable($o_prefix, $sobject);
 			
 					// Retrieve the object definition, using describeSObjects as this supercedes describeSObject()
-					// we pass an array as we are only passing a single objectType
-					$resultObject = $client->describeSObjects(array($objectType));
+					// we pass an array as we are only passing a single sobject
+					$resultObject = $client->describeSObjects(array($sobject->name));
+					$resultObject = $resultObject[0];
 
 					// Cycle through each field
 					foreach ($resultObject->fields as $field)
@@ -91,7 +91,7 @@ function buildTables($o_prefix, $o_user, $o_pass, $o_db, $wsdl, $user, $pass, $o
 					
 					// code to build the relationships between objects
 					
-					$temp = BuildRelationships($resultObject,$o_prefix,$objectType);
+					$temp = BuildRelationships($resultObject,$o_prefix,$sobject->name);
 					if($temp != NULL)
 					{
 						$buildRelationships = array_merge($buildRelationships, $temp);
@@ -104,7 +104,7 @@ function buildTables($o_prefix, $o_user, $o_pass, $o_db, $wsdl, $user, $pass, $o
 			}
 			// Close the sql table building file handle
 			fclose($handle);
-			echo $sqlFile . " has been created.<br />";
+			echo "<br />" . $sqlFile . " has been created.<br />";
 			
 			//var_dump($buildRelationships);
 			foreach ($buildRelationships as $relationship)
@@ -150,11 +150,13 @@ function buildTables($o_prefix, $o_user, $o_pass, $o_db, $wsdl, $user, $pass, $o
 			//Performs the table creation in local MySQL DB
 			if ($sql_statement != '')
 			{
-				$db->Execute($sql_statement);
+				if($db->Execute($sql_statement) == false) {
+					echo "Error performing query: " . $db->ErrorMsg() . "<br />";
+				}
 			}
 			else
 			{
-				echo "Error performing query: " . $db->ErrorMsg() . "<br />";
+				echo "No table to create.<br />";
 			}
 		}
 
@@ -165,14 +167,13 @@ function buildTables($o_prefix, $o_user, $o_pass, $o_db, $wsdl, $user, $pass, $o
 		
 		echo "All Tables Created in MySQL!<br />";
 		echo "**************** ALL DONE ****************<br />";
-		
 	}
-	catch (exception $e)
+	catch (Exception $ex)
 	{
 		// This is reached if there is a major problem in the data or with
 		// the salesforce.com connection. Normal data errors are caught by
 		// salesforce.com
-		echo '<pre>' . print_r($e, true) . '</pre>';
+		echo '<pre>' . print_r($ex, true) . '</pre>';
 		return false;
 		exit;
 	}
@@ -184,18 +185,17 @@ function BuildRelationships($resultObject, $o_prefix="sforce_", $objectType="Acc
 	// NOTE: I had to convert each table to InnoDB and split the ALTER SQL into separate queries, trying to do it in bulk breaks 
 	// $db->Execute() without a MySQL error!
 	// http://www.builderau.com.au/program/mysql/soa/Using-foreign-keys-and-referential-integrity-in-MySQL/0,339028784,339237600,00.htm
-
 	if ($resultObject->childRelationships != NULL)
 	{
 		//it will return an array of objects, or if there is ONLY one object it will just return the object not in an array
 		// if one object returned
-		If ($resultObject->childRelationships->field != NULL)
+		if ($resultObject->childRelationships->field != NULL)
 		{
-			$relationship = "ALTER TABLE " . $o_prefix . $resultObject->childRelationships->childSObject . " ADD INDEX (" . $resultObject->childRelationships->field . ");\n";
+			$relationship = "ALTER TABLE " . checkFieldName($o_prefix . $resultObject->childRelationships->childSObject) . " ADD INDEX (" . checkFieldName($resultObject->childRelationships->field) . ");\n";
 			$relationships[] = $relationship;
-			$relationship = "ALTER TABLE " . $o_prefix . $resultObject->childRelationships->childSObject . "\n";
-			$relationship .= " ADD FOREIGN KEY (". $resultObject->childRelationships->field . ")";
-			$relationship .= " REFERENCES " . $o_prefix . $objectType . " (Id);\n";
+			$relationship = "ALTER TABLE " . checkFieldName($o_prefix . $resultObject->childRelationships->childSObject) . "\n";
+			$relationship .= " ADD FOREIGN KEY (". checkFieldName($resultObject->childRelationships->field) . ")";
+			$relationship .= " REFERENCES " . checkFieldName($o_prefix . $objectType) . " (Id);\n";
 			$relationships[] = $relationship;
 		}
 		else
@@ -203,11 +203,11 @@ function BuildRelationships($resultObject, $o_prefix="sforce_", $objectType="Acc
 			// if multiple objects returned
 			foreach ($resultObject->childRelationships as $childrelationship)
 			{
-				$relationship = "ALTER TABLE " . $o_prefix . $childrelationship->childSObject . " ADD INDEX (" . $childrelationship->field . ");\n";
+				$relationship = "ALTER TABLE " . checkFieldName($o_prefix . $childrelationship->childSObject) . " ADD INDEX (" . checkFieldName($childrelationship->field) . ");\n";
 				$relationships[] = $relationship;
-				$relationship = "ALTER TABLE " . $o_prefix . $childrelationship->childSObject . "\n";
-				$relationship .= " ADD FOREIGN KEY (". $childrelationship->field . ")";
-				$relationship .= " REFERENCES " . $o_prefix . $objectType . " (Id);\n";
+				$relationship = "ALTER TABLE " . checkFieldName($o_prefix . $childrelationship->childSObject) . "\n";
+				$relationship .= " ADD FOREIGN KEY (". checkFieldName($childrelationship->field) . ")";
+				$relationship .= " REFERENCES " . checkFieldName($o_prefix . $objectType) . " (Id);\n";
 				$relationships[] = $relationship;
 			}
 		}
@@ -300,12 +300,27 @@ function FieldInfo($field)
 		$type = "ENUM(";
 		
 		//strip slashes
+		$activityTypes = array();
 		foreach ($field->picklistValues as $plist)
 		{
+			
+			// Avoid duplicates in ActivityType
+			// e.g : ActivityHistory.ActivityType ENUM('Call','Call','Email','Email','Meeting','Meeting','Other','Other')
+			// to  : ActivityHistory.ActivityType ENUM('Call', 'Email', 'Meeting', 'Other')
+			if ($field->name == 'ActivityType') {
+				if (in_array($plist, $activityTypes)) {
+					continue;
+				} else {
+					array_push($activityTypes, $plist);
+				}
+			}
+				
 			$temp = str_replace("'","''",$plist->value);
+
 			$type .= "'" . $temp . "',";
 		}
 		$type = substr($type, 0, strlen($type) - 1); // strip the end ,
+
 		$type .= ")";
 	}
 	// end of ENUMs
@@ -326,17 +341,17 @@ function FieldInfo($field)
 }
 
 // Creates the initial part of the table creation statement
-function StartTable($o_prefix, $objectType)
+function StartTable($o_prefix, $sobject)
 {
 	global $TableList;
     if (empty($o_prefix))
     {
 		//put this in to check for keywords, replacing the commented code below
-		$objectType = checkFieldName($objectType);
+		$objectType = checkFieldName($sobject->name);
     }
     else
     {
-      $objectType = $o_prefix.$objectType;
+      $objectType = $o_prefix.$sobject->name;
     }
     $header = "\n/********************************************************************" .
         "\n         TABLE FROM SALESFORCE.COM OBJECT " . $objectType . "\n*********************************************************************/" .
@@ -348,7 +363,7 @@ function StartTable($o_prefix, $objectType)
 // Creates the final part of the table creation statement
 function EndTable()
 {
-    return "\n\t)TYPE=InnoDB;\n\n";
+    return "\n\t)ENGINE=InnoDB;\n\n";
 }
 
 
