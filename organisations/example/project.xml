@@ -1,0 +1,16 @@
+<?xml version="1.0" enconding="utf-8"?>
+
+<project name="example">
+
+	<salesforce
+		login="example@company.com"
+		password="salesforce_password"
+                securitykey="abcdef123456" />
+
+	<mysql
+		login="mysql_user"
+		password="mysql_password"
+		dbname="salesforce_db"
+		tableprefix="" />
+
+</project>
